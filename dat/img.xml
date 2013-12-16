@@ -1,0 +1,6 @@
+<spritedef>
+	<file fname="img.png">
+		<sprite name="solblack">0, 0, 64, 64</sprite>
+		<sprite name="forest_t">64, 0, 128, 64</sprite>
+	</file>
+</spritedef>
