@@ -59,7 +59,14 @@ class BasicAnim(object):
 			self.rect.move_ip(pos)
 			surf.blit(cimg, self.rect)
 
-
+class MovingAnim(BasicAnim):
+	def __init__(self, scr_per, img_pos, duration=-1):
+		super(MovingAnim, self).__init__(scr_per, 
+				map((lambda x: x[0]), img_pos),
+				duration)
+		self.pos = map((lambda x: x[1]), img_pos)
+	def draw(self, surf):
+		super(B, self).draw(self.pos[self.img_ptr], surf)
 
 
 

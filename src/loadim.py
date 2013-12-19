@@ -13,7 +13,7 @@ import re
 import pygame
 import lxml.etree as ET
 
-def _get_sprite(text, surf, line):
+def _get_sprite(text, surf, line, ckey=None):
 	mch = text.split(',')
 	if len(mch) != 4:
 		raise Exception,'Bad sprite specifier'.join(str(line))
@@ -21,8 +21,10 @@ def _get_sprite(text, surf, line):
 	y1 = int(mch[1])
 	x2 = int(mch[2])
 	y2 = int(mch[3])
-	sprite = pygame.Surface((x2 - x1, y2 - y1))
+	sprite = pygame.Surface((x2 - x1, y2 - y1), 0, surf)
 	sprite.blit(surf, (0, 0), pygame.Rect(x1, y1, x2 - x1, y2 - y1))
+	if ckey is not None:
+		sprite.set_colorkey(ckey)
 	return sprite
 
 
@@ -32,9 +34,16 @@ def _lf(elem, root_tag, path, dict):
 	if fn is None:
 		raise Exception,'Error, no file name: @'.join(str(elem.sourceline))
 	surf = pygame.image.load(os.path.join(path, fn))
-	surf = surf.convert()
+	ckey = elem.get('colorkey', None)
+	if ckey is not None and surf.get_masks()[3] == 0:
+		ckey = pygame.Color(ckey)
+		surf.set_colorkey(ckey)
+	elif surf.get_masks()[3] != 0:
+		ckey = None
+		surf = surf.convert_alpha()
+	else:
+		surf = surf.convert()
 	for el in elem:
-#		print el
 		if el.tag != 'sprite':
 			raise Exception,'Error, bad tag: '.join(el.tag).join(
 					'@').join(str(el.sourceline))
@@ -45,7 +54,7 @@ def _lf(elem, root_tag, path, dict):
 		if dict.get(full_name, None) is not None:
 			raise Exception,'Error: full name already defined: '.join(
 					full_name).join('@').join(el.sourceline)
-		sprite = _get_sprite(el.text, surf, el.sourceline)
+		sprite = _get_sprite(el.text, surf, el.sourceline, ckey)
 		dict[full_name] = sprite
 
 def load_file(fn):
@@ -65,10 +74,18 @@ def load_file(fn):
 		if elem.tag != 'file':
 			raise Exception, 'Error, bad tag: '.join(elem.tag).join(
 					'@').join(str(elem.sourceline))
-#		print elem
 		_lf(elem, root_tag, path, dict)
 	return dict
 
 if __name__ == '__main__':
 	pygame.init()
 	load_file('../dat/img.xml')
+
+
+
+
+
+
+
+
+

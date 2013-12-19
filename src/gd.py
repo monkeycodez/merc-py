@@ -19,16 +19,16 @@ def get_tile(gb, pos, genv):
 	tilesz = genv['tilesz']
 	return gb[pos[0] / tilesz][pos[1] / tilesz]
 
-def draw_gb(surf, gb, genv):
-	surf.lock()
+def draw_gb(gb, genv, to=None):
 	tsz = genv['tilesz']
 	xsz = len(gb)
 	ysz = len(gb[0])
 	xend = tsz * xsz
 	yend = tsz * ysz
 	rct = Rect(0, 0, 1, 1)
-	surfh = surf.get_height()
-	surfw = surf.get_width()
+	surf = to
+	if surf is None:
+		surf = pygame.Surface((xend, yend), 0, genv['screen'])
 	gcol = genv.get('grid_col', Color('black'))
 	#start off by drawing the gridlines
 	surf.fill(Color('black'))
@@ -47,5 +47,20 @@ def draw_gb(surf, gb, genv):
 			rct.x = tl.xl * tsz + 1
 			rct.y = tl.yl * tsz + 1
 			surf.blit(tl.surf, rct)
+		#	if tl.ent is not None:
+		#		surf.blit(tl.ent.surf, rct)
 
+	return surf
+
+def draw_ent(gb, genv, to=None):
+	tsz = genv['tilesz']
+	xsz, ysz = gb.size
+	xend = tsz * xsz
+	yend = tsz * ysz
+	if to is None:
+		to = pygame.Surface((xend, yend), 0, gb['screen'])
+	for xl in gb:
+		for tl in xl:
+			if tl.ent is not None:
+				to.blit(tl.ent.surf, (tl.xl * tsz + 1, tl.yl * tsz + 1))
 
