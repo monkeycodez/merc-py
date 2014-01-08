@@ -13,14 +13,15 @@ import re
 import pygame
 import lxml.etree as ET
 
-def _get_sprite(text, surf, line, ckey=None):
-	mch = text.split(',')
-	if len(mch) != 4:
-		raise Exception,'Bad sprite specifier'.join(str(line))
-	x1 = int(mch[0])
-	y1 = int(mch[1])
-	x2 = int(mch[2])
-	y2 = int(mch[3])
+def _get_sprite(el, surf, line, ckey=None):
+	text = el.text
+	m = re.search(r'\s?(\d*)\s?,\s?(\d*)\s?,\s?(\d*)\s?,\s?(\d*)', text)
+	if m is None:
+		raise Exception('Bad text: @'.join(str(elem.sourceline)))
+	x1 = int(m.group(1))
+	y1 = int(m.group(2))
+	x2 = int(m.group(3))
+	y2 = int(m.group(4))
 	sprite = pygame.Surface((x2 - x1, y2 - y1), 0, surf)
 	sprite.blit(surf, (0, 0), pygame.Rect(x1, y1, x2 - x1, y2 - y1))
 	if ckey is not None:
@@ -54,7 +55,7 @@ def _lf(elem, root_tag, path, dict):
 		if dict.get(full_name, None) is not None:
 			raise Exception,'Error: full name already defined: '.join(
 					full_name).join('@').join(el.sourceline)
-		sprite = _get_sprite(el.text, surf, el.sourceline, ckey)
+		sprite = _get_sprite(el, surf, el.sourceline, ckey)
 		dict[full_name] = sprite
 
 def load_file(fn):

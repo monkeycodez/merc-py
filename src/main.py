@@ -20,7 +20,8 @@
 #		tilesz		66			The size in pixels of game tiles for drawing
 #
 
-import 	pygame, os, sys
+import 	os, sys, re
+import pygame
 from pygame.locals import *
 from getopt import getopt, GetoptError
 import gd, game
@@ -39,7 +40,7 @@ def begin_game(genv):
 	sel = False
 	tsel = None
 	while True:
-		gd.draw_gb(scr, gb, genv)
+		gd.draw_gb(gb, genv, scr)
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				sys.exit()
@@ -81,11 +82,10 @@ def main(argv):
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt in ("-s", "--size"):
-			i = arg.find('x')
-			if i == -1 : 
-				raise Exception, \
-					"Bad Resolution string: " + str(arg)
-			genv["size"] = (int(arg[0:i]), int(arg[i+1:]))
+			m = re.match(r'^(\d*)[x](\d*)$', arg)
+			if m is None:
+				raise Exception("Bad Resolution string: " + str(arg))
+			genv["size"] = (int(m.group(1)), int(m.group(2)))
 		elif opt in ("-f", "--fullscreen"):
 			genv["fullscr"] = True
 		else:
